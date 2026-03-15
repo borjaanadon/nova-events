@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova Events</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --nova-accent: #0EB0A4;
+      --nova-bg-primary: #090E12;
+      --nova-bg-secondary: #131C24;
+      --nova-text-primary: #FFFFFF;
+      --nova-text-secondary: rgba(255, 255, 255, 0.7);
+      --nova-text-muted: rgba(255, 255, 255, 0.4);
+      --nova-border: rgba(255, 255, 255, 0.1);
+      --nova-badge-red: #E53E3E;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: var(--nova-bg-primary);
+      color: var(--nova-text-primary);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .header h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      white-space: nowrap;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-input {
+      background: var(--nova-bg-secondary);
+      border: 1px solid var(--nova-border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: var(--nova-text-primary);
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+      width: 300px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input::placeholder { color: var(--nova-text-muted); }
+    .search-input:focus { border-color: var(--nova-accent); }
+
+    .filter-btn {
+      background: var(--nova-bg-secondary);
+      border: 1px solid var(--nova-border);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--nova-text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s;
+    }
+
+    .filter-btn:hover { border-color: var(--nova-accent); }
+
+    .filter-btn svg { width: 20px; height: 20px; }
+
+    /* Event count */
+    .event-count {
+      font-size: 14px;
+      color: var(--nova-text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Grid */
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .events-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      .events-grid { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; }
+      .search-input { width: 100%; }
+      .search-bar { width: 100%; }
+    }
+
+    /* Card */
+    .event-card {
+      background: var(--nova-bg-secondary);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .event-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Placeholder image */
+    .card-image {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .card-image-label {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.15);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Card body */
+    .card-body { padding: 16px; }
+
+    /* Tags row */
+    .card-tags {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .card-category {
+      font-size: 12px;
+      color: var(--nova-text-secondary);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .card-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .badge-top-rated {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: var(--nova-text-primary);
+    }
+
+    .badge-last-tickets {
+      background: var(--nova-accent);
+      color: #fff;
+    }
+
+    .badge-online {
+      border: 1px solid var(--nova-accent);
+      color: var(--nova-accent);
+    }
+
+    .badge-hybrid {
+      border: 1px solid #D69E2E;
+      color: #D69E2E;
+    }
+
+    /* Title */
+    .card-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1.3;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Meta info */
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--nova-text-secondary);
+    }
+
+    .card-meta-row svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    /* Filter dropdown */
+    .filter-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--nova-bg-secondary);
+      border: 1px solid var(--nova-border);
+      border-radius: 8px;
+      padding: 8px;
+      z-index: 100;
+      min-width: 200px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .filter-dropdown.active { display: block; }
+
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--nova-text-secondary);
+      transition: background 0.15s;
+    }
+
+    .filter-option:hover { background: rgba(255, 255, 255, 0.05); }
+    .filter-option.active { color: var(--nova-accent); }
+
+    .filter-option input { accent-color: var(--nova-accent); }
+
+    .filter-wrapper { position: relative; }
+
+    /* No results */
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--nova-text-muted);
+      font-size: 16px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { border-radius: 8px; background: var(--nova-bg-primary); }
+    ::-webkit-scrollbar-thumb { border-radius: 8px; background: var(--nova-bg-secondary); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Next events</h1>
+      <div class="search-bar">
+        <input type="text" class="search-input" placeholder="Search by city, name, keyword..." id="searchInput">
+        <div class="filter-wrapper">
+          <button class="filter-btn" id="filterBtn" aria-label="Filter events">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          </button>
+          <div class="filter-dropdown" id="filterDropdown"></div>
+        </div>
+      </div>
+    </div>
+    <div class="event-count" id="eventCount"></div>
+    <div class="events-grid" id="eventsGrid"></div>
+  </div>
+
+  <script>
+    const EVENTS = [
+      {"id":1084,"title":"C-Level Dinner: Miguel Cami\u00f1a  (Micappital) | Madrid","format":"ON_SITE","start_date":"2026-03-16T19:30:00Z","top_rated":true,"location":"Madrid","few_tickets_left":true,"event_type":"C-Level Dinner"},
+      {"id":1103,"title":"March Afterwork | Copenhagen","format":"ON_SITE","start_date":"2026-03-17T18:00:00Z","top_rated":true,"location":"Copenhagen","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":965,"title":"March Afterwork | Milan","format":"ON_SITE","start_date":"2026-03-17T18:00:00Z","top_rated":false,"location":"Milan","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":995,"title":"C-Level Dinner: Olga Shirokova (arol.dev & Kiara) | Barcelona","format":"ON_SITE","start_date":"2026-03-17T19:30:00Z","top_rated":true,"location":"Barcelona","few_tickets_left":true,"event_type":"C-Level Dinner"},
+      {"id":1131,"title":"C-Level Talk: How a Unicorn is Made with Nitya Fajardo (Factorial) | Online","format":"ONLINE","start_date":"2026-03-18T16:00:00Z","top_rated":true,"location":"","few_tickets_left":false,"event_type":"Nova Knowledge"},
+      {"id":1025,"title":"March Afterwork | Padova","format":"ON_SITE","start_date":"2026-03-18T17:30:00Z","top_rated":false,"location":"Padova","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1116,"title":"March Afterwork | Berlin","format":"ON_SITE","start_date":"2026-03-18T18:00:00Z","top_rated":false,"location":"Berlin","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1101,"title":"Nova Knowledge: Public Speaking with Susie Ashfield | London","format":"ON_SITE","start_date":"2026-03-18T18:30:00Z","top_rated":false,"location":"London","few_tickets_left":false,"event_type":"Nova Knowledge"},
+      {"id":1105,"title":"March Happy Hour & Karaoke | Rome","format":"ON_SITE","start_date":"2026-03-18T18:30:00Z","top_rated":true,"location":"Rome","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":970,"title":"C-Level Dinner: Cristiana Scelza (Prysmian) | Milan","format":"ON_SITE","start_date":"2026-03-18T19:30:00Z","top_rated":false,"location":"Milan","few_tickets_left":false,"event_type":"C-Level Dinner"},
+      {"id":1121,"title":"March Afterwork | Stockholm","format":"ON_SITE","start_date":"2026-03-19T16:30:00Z","top_rated":false,"location":"Stockholm","few_tickets_left":true,"event_type":"Afterwork"},
+      {"id":1090,"title":"Nova x Inverto: Dive into the Future of Procurement","format":"ON_SITE","start_date":"2026-03-19T17:00:00Z","top_rated":false,"location":"Milan","few_tickets_left":false,"event_type":"Other"},
+      {"id":1047,"title":"March Happy Hour | Munich","format":"ON_SITE","start_date":"2026-03-19T17:30:00Z","top_rated":false,"location":"Munich","few_tickets_left":false,"event_type":"Meetup"},
+      {"id":974,"title":"Spring Afterwork | Zurich","format":"ON_SITE","start_date":"2026-03-19T17:30:00Z","top_rated":false,"location":"Zurich","few_tickets_left":false,"event_type":"Nova Stories"},
+      {"id":1041,"title":"Reduced Group Coaching Session - March | Madrid","format":"ON_SITE","start_date":"2026-03-19T18:00:00Z","top_rated":false,"location":"Madrid","few_tickets_left":false,"event_type":"Nova Knowledge"},
+      {"id":1115,"title":"Nova Knowledge: The Startup Funding Map | Online","format":"ONLINE","start_date":"2026-03-19T18:00:00Z","top_rated":false,"location":"","few_tickets_left":false,"event_type":"Nova Knowledge"},
+      {"id":1099,"title":"Chicago Booth | EMBA Open Day","format":"ON_SITE","start_date":"2026-03-21T08:45:00Z","top_rated":true,"location":"London","few_tickets_left":false,"event_type":"Nova Session"},
+      {"id":990,"title":"Nova Padel Connect - Americana & Aperitivo | Barcelona","format":"ON_SITE","start_date":"2026-03-21T10:00:00Z","top_rated":false,"location":"Barcelona","few_tickets_left":false,"event_type":"Padel Event"},
+      {"id":1016,"title":"The Clubhouse\u2019s Long Run X | London","format":"ON_SITE","start_date":"2026-03-22T07:45:00Z","top_rated":false,"location":"SW15 1LB, London","few_tickets_left":false,"event_type":"Weekend"},
+      {"id":1117,"title":"C-Level Dinner: Carla Barber (Cl\u00ednicas Barber) | Madrid","format":"ON_SITE","start_date":"2026-03-23T19:30:00Z","top_rated":false,"location":"Madrid","few_tickets_left":false,"event_type":"C-Level Dinner"},
+      {"id":1110,"title":"Marketing at Google Cloud: The Gen AI Revolution | Milan","format":"ON_SITE","start_date":"2026-03-24T17:30:00Z","top_rated":false,"location":"Milan","few_tickets_left":false,"event_type":"Nova Knowledge"},
+      {"id":1102,"title":"Nova Knowledge: From Big Tech to building your own path | Online","format":"ONLINE","start_date":"2026-03-24T18:00:00Z","top_rated":false,"location":"","few_tickets_left":false,"event_type":"Nova Knowledge"},
+      {"id":998,"title":"March Happy Hour | New York","format":"ON_SITE","start_date":"2026-03-24T21:30:00Z","top_rated":false,"location":"New York","few_tickets_left":false,"event_type":"Meetup"},
+      {"id":1085,"title":"CEO Dinner: Catherine Doyle (Microsoft Ireland) | Dublin","format":"ON_SITE","start_date":"2026-03-25T17:45:00Z","top_rated":true,"location":"Dublin","few_tickets_left":false,"event_type":"C-Level Talks"},
+      {"id":1076,"title":"March Dinner | Geneva","format":"ON_SITE","start_date":"2026-03-25T18:30:00Z","top_rated":false,"location":"Geneva","few_tickets_left":false,"event_type":"Dine out"},
+      {"id":1092,"title":"Bowling Night & Dinner | Turin","format":"ON_SITE","start_date":"2026-03-25T19:00:00Z","top_rated":false,"location":"Turin","few_tickets_left":false,"event_type":"Other"},
+      {"id":1108,"title":"March Afterwork | La Coru\u00f1a","format":"ON_SITE","start_date":"2026-03-26T19:00:00Z","top_rated":false,"location":"A Coru\u00f1a","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1140,"title":"Historical Tour & Theatre | Istanbul","format":"ON_SITE","start_date":"2026-03-28T11:00:00Z","top_rated":true,"location":"Istanbul","few_tickets_left":false,"event_type":"Other"},
+      {"id":1100,"title":"Art & Connect @Fondazione Prada | Milan","format":"ON_SITE","start_date":"2026-03-28T15:00:00Z","top_rated":true,"location":"Milan","few_tickets_left":true,"event_type":"Weekend"},
+      {"id":1017,"title":"The Clubhouse\u2019s Long Run XI | London","format":"ON_SITE","start_date":"2026-03-29T06:45:00Z","top_rated":false,"location":"SW15 1LB, London","few_tickets_left":false,"event_type":"Weekend"},
+      {"id":1109,"title":"Nova Symposium: Thinking together | Madrid","format":"ON_SITE","start_date":"2026-03-31T17:30:00Z","top_rated":false,"location":"Madrid","few_tickets_left":false,"event_type":"Meetup"},
+      {"id":1091,"title":"Afterwork Clay Shooting Experience | London","format":"ON_SITE","start_date":"2026-03-31T18:00:00Z","top_rated":false,"location":"London","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1018,"title":"The Clubhouse\u2019s Long Run XII | London","format":"ON_SITE","start_date":"2026-04-05T06:45:00Z","top_rated":false,"location":"SW15 1LB, London","few_tickets_left":false,"event_type":"Weekend"},
+      {"id":1060,"title":"Exclusive Aperitif 30+ @White Rabbit Speakeasy | Milan","format":"ON_SITE","start_date":"2026-04-08T17:00:00Z","top_rated":false,"location":"Milan","few_tickets_left":true,"event_type":"Senior Dine Out"},
+      {"id":1088,"title":"Nova Knowledge | Simon Pellas (Monument Bank) & Tim Backstrom (PPRO) | London","format":"ON_SITE","start_date":"2026-04-08T17:30:00Z","top_rated":false,"location":"London","few_tickets_left":false,"event_type":"C-Level Dinner"},
+      {"id":1120,"title":"April Afterwork | Madrid","format":"ON_SITE","start_date":"2026-04-09T18:00:00Z","top_rated":false,"location":"Madrid","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1019,"title":"The Clubhouse\u2019s Long Run XIII | London","format":"ON_SITE","start_date":"2026-04-12T06:45:00Z","top_rated":false,"location":"SW15 1LB, London","few_tickets_left":false,"event_type":"Weekend"},
+      {"id":1083,"title":"C-Level Talk: V\u00edctor Villanueva (Lotus Bakeries) | Madrid (Nova\u2019s offices)","format":"ON_SITE","start_date":"2026-04-13T17:30:00Z","top_rated":false,"location":"Madrid","few_tickets_left":false,"event_type":"C-Level Dinner"},
+      {"id":1075,"title":"April Afterwork | Geneva","format":"ON_SITE","start_date":"2026-04-14T16:30:00Z","top_rated":false,"location":"Geneva","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1123,"title":"Nova Knowledge: Land your next role abroad | Online","format":"ONLINE","start_date":"2026-04-14T17:30:00Z","top_rated":false,"location":"","few_tickets_left":false,"event_type":"Nova Knowledge"},
+      {"id":972,"title":"April Afterwork | Milan","format":"ON_SITE","start_date":"2026-04-15T17:00:00Z","top_rated":false,"location":"Milan","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1119,"title":"April Afterwork | Barcelona","format":"ON_SITE","start_date":"2026-04-15T17:30:00Z","top_rated":true,"location":"Barcelona","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1089,"title":"April Afterwork | London","format":"ON_SITE","start_date":"2026-04-16T18:00:00Z","top_rated":false,"location":"London","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1020,"title":"The Clubhouse\u2019s Long Run XIV | London","format":"ON_SITE","start_date":"2026-04-19T06:45:00Z","top_rated":false,"location":"SW15 1LB, London","few_tickets_left":false,"event_type":"Weekend"},
+      {"id":1138,"title":"Marketing | Global Speed Networking Online","format":"ONLINE","start_date":"2026-04-21T17:00:00Z","top_rated":false,"location":"","few_tickets_left":false,"event_type":"Meetup"},
+      {"id":1021,"title":"CEO Dinner: Markus Sieger (Polpharma) | Zurich","format":"ON_SITE","start_date":"2026-04-22T16:30:00Z","top_rated":false,"location":"Zurich","few_tickets_left":false,"event_type":"C-Level Dinner"},
+      {"id":1087,"title":"CEO Dinner: Stas Bichenko (recombine.ai) | London","format":"ON_SITE","start_date":"2026-04-23T18:30:00Z","top_rated":false,"location":"London","few_tickets_left":false,"event_type":"C-Level Dinner"},
+      {"id":1114,"title":"C-Level Dinner: Iv\u00e1n Landabaso (JME Ventures) | Barcelona","format":"ON_SITE","start_date":"2026-04-28T18:30:00Z","top_rated":true,"location":"Barcelona, Spain","few_tickets_left":false,"event_type":"C-Level Dinner"},
+      {"id":1104,"title":"C-Level Talk: Fabio Moioli (Spencer Stuart) | Milan","format":"ON_SITE","start_date":"2026-04-29T16:45:00Z","top_rated":true,"location":"Milan","few_tickets_left":true,"event_type":"C-Level Talks"},
+      {"id":1071,"title":"April Dinner | Geneva","format":"ON_SITE","start_date":"2026-04-29T17:30:00Z","top_rated":false,"location":"Geneva","few_tickets_left":false,"event_type":"Dine out"},
+      {"id":960,"title":"Nova Event - Chiomenti Academy: Bright Future Program","format":"HYBRID","start_date":"2026-05-06T16:00:00Z","top_rated":false,"location":"Milan","few_tickets_left":false,"event_type":"Nova Session"},
+      {"id":1095,"title":"Dine & Connect 30+ | London","format":"ON_SITE","start_date":"2026-05-06T18:45:00Z","top_rated":false,"location":"London","few_tickets_left":false,"event_type":"Senior Dine Out"},
+      {"id":1074,"title":"May Afterwork | Geneva","format":"ON_SITE","start_date":"2026-05-12T16:30:00Z","top_rated":false,"location":"Geneva","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1094,"title":"May Afterwork | London","format":"ON_SITE","start_date":"2026-05-26T18:00:00Z","top_rated":false,"location":"London","few_tickets_left":false,"event_type":"Afterwork"},
+      {"id":1133,"title":"Future Leaders | Schwarzman Scholars, Milan","format":"ON_SITE","start_date":"2026-05-28T05:00:00Z","top_rated":false,"location":"Milan","few_tickets_left":false,"event_type":"Other"}
+    ];
+
+    const TYPE_COLORS = {
+      "C-Level Dinner": "#1a2a3a",
+      "C-Level Talks": "#1a2a3a",
+      "Afterwork": "#2a1a2a",
+      "Nova Knowledge": "#1a2a2a",
+      "Nova Stories": "#2a2a1a",
+      "Meetup": "#1a2a1a",
+      "Weekend": "#2a1a1a",
+      "Padel Event": "#1a2a1a",
+      "Dine out": "#2a2a1a",
+      "Senior Dine Out": "#2a2a1a",
+      "Nova Session": "#1a2a2a",
+      "Other": "#1a1a2a"
+    };
+
+    const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      const day = d.getUTCDate();
+      const mon = MONTHS[d.getUTCMonth()];
+      const year = d.getUTCFullYear();
+      const h = String(d.getUTCHours()).padStart(2, "0");
+      const m = String(d.getUTCMinutes()).padStart(2, "0");
+      return `${day} ${mon}, ${year} | ${h}:${m}h`;
+    }
+
+    function getLocation(ev) {
+      if (ev.location && ev.location.trim()) return ev.location.trim();
+      if (ev.format === "ONLINE") return "Online";
+      if (ev.format === "HYBRID") return "Online / On-site";
+      return "";
+    }
+
+    function renderCard(ev) {
+      const bg = TYPE_COLORS[ev.event_type] || "#1a1a2a";
+      const loc = getLocation(ev);
+
+      let badges = "";
+      if (ev.top_rated) badges += '<span class="badge badge-top-rated">Top rated</span>';
+      if (ev.few_tickets_left) badges += '<span class="badge badge-last-tickets">Last tickets</span>';
+      if (ev.format === "ONLINE") badges += '<span class="badge badge-online">Online</span>';
+      else if (ev.format === "HYBRID") badges += '<span class="badge badge-hybrid">Hybrid</span>';
+
+      return `
+        <div class="event-card" data-title="${ev.title.toLowerCase()}" data-location="${loc.toLowerCase()}" data-type="${ev.event_type.toLowerCase()}">
+          <div class="card-image" style="background:${bg}">
+            <span class="card-image-label">${ev.event_type}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-tags">
+              <span class="card-category">${ev.event_type}</span>
+              <div class="card-badges">${badges}</div>
+            </div>
+            <div class="card-title">${ev.title}</div>
+            <div class="card-meta">
+              <div class="card-meta-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>${formatDate(ev.start_date)}</span>
+              </div>
+              ${loc ? `<div class="card-meta-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>${loc}</span>
+              </div>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Get unique event types for filter
+    const eventTypes = [...new Set(EVENTS.map(e => e.event_type))].sort();
+    let activeFilters = new Set();
+
+    function buildFilterDropdown() {
+      const dd = document.getElementById("filterDropdown");
+      dd.innerHTML = eventTypes.map(t => `
+        <label class="filter-option" data-type="${t}">
+          <input type="checkbox" value="${t}"> ${t}
+        </label>
+      `).join("");
+
+      dd.querySelectorAll("input").forEach(cb => {
+        cb.addEventListener("change", () => {
+          if (cb.checked) activeFilters.add(cb.value);
+          else activeFilters.delete(cb.value);
+          renderEvents();
+        });
+      });
+    }
+
+    function renderEvents() {
+      const query = document.getElementById("searchInput").value.toLowerCase().trim();
+      const grid = document.getElementById("eventsGrid");
+
+      const filtered = EVENTS.filter(ev => {
+        const matchSearch = !query ||
+          ev.title.toLowerCase().includes(query) ||
+          getLocation(ev).toLowerCase().includes(query) ||
+          ev.event_type.toLowerCase().includes(query);
+
+        const matchFilter = activeFilters.size === 0 || activeFilters.has(ev.event_type);
+
+        return matchSearch && matchFilter;
+      });
+
+      document.getElementById("eventCount").textContent = `${filtered.length} event${filtered.length !== 1 ? "s" : ""}`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="no-results">No events match your search</div>';
+      } else {
+        grid.innerHTML = filtered.map(renderCard).join("");
+      }
+    }
+
+    // Init
+    buildFilterDropdown();
+    renderEvents();
+
+    document.getElementById("searchInput").addEventListener("input", renderEvents);
+
+    document.getElementById("filterBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.getElementById("filterDropdown").classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".filter-wrapper")) {
+        document.getElementById("filterDropdown").classList.remove("active");
+      }
+    });
+  </script>
+</body>
+</html>
