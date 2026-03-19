@@ -562,6 +562,21 @@ const EVENTS = [
 /* ── Public events (listed on Luma) ── */
 const PUBLIC_EVENT_IDS = new Set([1121, 974, 990, 998, 1092, 1025, 1140, 1109, 1088, 1075, 1123, 1089]);
 
+const LUMA_LINKS = {
+  1121: 'https://luma.com/76dt076t',
+  974: 'https://luma.com/gjuoli36',
+  990: 'https://luma.com/hgwbizgx',
+  998: 'https://luma.com/wcvp8nhi',
+  1092: 'https://luma.com/xgtiay15',
+  1025: 'https://luma.com/jip88v31',
+  1140: 'https://luma.com/mkj3m619',
+  1109: 'https://luma.com/x4p2mkr5',
+  1088: 'https://luma.com/s7heban8',
+  1075: 'https://luma.com/xjm9vkag',
+  1123: 'https://luma.com/hmvjdgn1',
+  1089: 'https://luma.com/se1kde03'
+};
+
 /* ── Image system: real event photos from Nova ── */
 const EVENT_IMAGES = {
   1131: 'https://quasar.novatalent.com/files?token=5fa2132ffa935b1e653d07bd83ebfcf5522449a8412bc4b8a8ed3c5ecf708fb100f5740db4335273e749f3015e09b59313ac1e21e48e445a9cdaa9290851b8ce',
@@ -718,7 +733,8 @@ function render() {
     if (ev.top_rated) badges += '<span class="badge-top">Top Rated</span>';
     if (ev.few_tickets_left) badges += '<span class="badge-few">Few tickets left</span>';
 
-    return `<a class="card-link" href="${ev.public_link}" target="_blank" rel="noopener">
+    const link = LUMA_LINKS[ev.id] || ev.public_link;
+    return `<a class="card-link" href="${link}" target="_blank" rel="noopener">
       <div class="card-img-wrap">
         <img src="${img}" alt="${ev.title.replace(/"/g, '&quot;')}" loading="lazy">
       </div>
